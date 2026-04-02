@@ -121,8 +121,9 @@ const Dashboard = () => {
                     borderTop: "1px solid #eee",
                   }}
                 >
-                  <Typography fontWeight={700} fontSize="18px">
-                    ₹{event.price}
+                  <Typography>
+                    VIP: ₹{event.vipPrice ?? event.price} | Regular: ₹
+                    {event.regularPrice ?? event.price}
                   </Typography>
 
                   <Button

@@ -11,17 +11,22 @@ function SeatGrid() {
   const totalSeats = rows * cols;
 
   const [selectedSeats, setSelectedSeats] = useState([]);
-  const [eventTitle, setEventTitle] = useState("");
+  const [event, setEvent] = useState(null);
   const [bookedSeats, setBookedSeats] = useState([]);
 
-  // Fetch Event Details
+  // 🔥 FIX: validate ID before API call
   useEffect(() => {
+    if (!id || id === "all" || id === "undefined") {
+      console.log("Invalid ID:", id);
+      return;
+    }
+
     const fetchEvent = async () => {
       try {
         const res = await axios.get(
           `https://gotixnow-backend.onrender.com/api/events/${id}`,
         );
-        setEventTitle(res.data.event.title);
+        setEvent(res.data.event);
       } catch (err) {
         console.log("Error fetching event", err);
       }
@@ -32,6 +37,8 @@ function SeatGrid() {
 
   // Fetch booked seats
   const fetchBookedSeats = async () => {
+    if (!id || id === "all" || id === "undefined") return;
+
     try {
       const res = await axios.get(
         `https://gotixnow-backend.onrender.com/api/bookings/event/${id}`,
@@ -46,9 +53,17 @@ function SeatGrid() {
     fetchBookedSeats();
   }, [id]);
 
+  // Price logic (same)
   const getSeatPrice = (seatNumber) => {
-    if (seatNumber <= 20) return 1000;
-    return 500;
+    if (!event) return 0;
+
+    if (event.vipPrice != null && event.regularPrice != null) {
+      return seatNumber <= 20
+        ? Number(event.vipPrice)
+        : Number(event.regularPrice);
+    }
+
+    return Number(event.price) || 0;
   };
 
   const toggleSeat = (seatNumber) => {
@@ -66,7 +81,6 @@ function SeatGrid() {
     0,
   );
 
-  // Booking API
   const handleProceed = async () => {
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat.");
@@ -77,7 +91,7 @@ function SeatGrid() {
 
     try {
       user = JSON.parse(localStorage.getItem("user"));
-    } catch (err) {
+    } catch {
       user = null;
     }
 
@@ -94,8 +108,6 @@ function SeatGrid() {
       totalAmount,
     };
 
-    console.log("Booking payload:", payload);
-
     try {
       const res = await axios.post(
         "https://gotixnow-backend.onrender.com/api/bookings/create",
@@ -111,10 +123,7 @@ function SeatGrid() {
         navigate("/dashboard");
       }
     } catch (err) {
-      console.log("Booking error:", err.response?.data);
-
       alert(err.response?.data?.message || "Booking failed. Please try again.");
-
       fetchBookedSeats();
     }
   };
@@ -129,7 +138,7 @@ function SeatGrid() {
       }}
     >
       <h2 style={{ textAlign: "center", marginBottom: "10px" }}>
-        🎟 {eventTitle}
+        🎟 {event?.title}
       </h2>
 
       <div
@@ -194,8 +203,12 @@ function SeatGrid() {
       </div>
 
       <div style={{ marginTop: "30px", textAlign: "center" }}>
-        <span style={{ marginRight: "20px" }}>🟣 VIP (₹1000)</span>
-        <span style={{ marginRight: "20px" }}>🔵 Regular (₹500)</span>
+        <span style={{ marginRight: "20px" }}>
+          🟣 VIP (₹{event?.vipPrice ?? event?.price})
+        </span>
+        <span style={{ marginRight: "20px" }}>
+          🔵 Regular (₹{event?.regularPrice ?? event?.price})
+        </span>
         <span style={{ marginRight: "20px" }}>🔴 Selected</span>
         <span>⚫ Booked</span>
       </div>

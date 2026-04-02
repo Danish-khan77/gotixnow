@@ -23,12 +23,15 @@ import {
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 
+const API_BASE = "http://localhost:5000"; // 🔥 CHANGE THIS TO YOUR PORT
+
 function AdminCreateEvent() {
   const [formData, setFormData] = useState({
     title: "",
     venue: "",
     date: "",
-    price: "",
+    vipPrice: "",
+    regularPrice: "",
     city: "",
   });
 
@@ -52,9 +55,7 @@ function AdminCreateEvent() {
 
   const fetchEvents = async () => {
     try {
-      const res = await fetch(
-        "https://gotixnow-backend.onrender.com/api/events/all",
-      );
+      const res = await fetch(`${API_BASE}/api/events/all`);
       const data = await res.json();
       setEvents(data.events || []);
     } catch {
@@ -84,18 +85,31 @@ function AdminCreateEvent() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // ✅ Frontend validation
+    if (!formData.title || !formData.date || !formData.city) {
+      showSnackbar("Title, date and city are required ❌", "error");
+      return;
+    }
+    if (!formData.regularPrice) {
+      showSnackbar("Regular price is required ❌", "error");
+      return;
+    }
+
     const data = new FormData();
+
     Object.keys(formData).forEach((key) => {
-      data.append(key, formData[key]);
+      if (formData[key] !== "") {
+        data.append(key, formData[key]);
+      }
     });
 
     if (image) data.append("image", image);
 
-    let url = "https://gotixnow-backend.onrender.com/api/events/create";
+    let url = `${API_BASE}/api/events/create`;
     let method = "POST";
 
     if (editId) {
-      url = `https://gotixnow-backend.onrender.com/api/events/update/${editId}`;
+      url = `${API_BASE}/api/events/update/${editId}`;
       method = "PUT";
     }
 
@@ -105,7 +119,11 @@ function AdminCreateEvent() {
         body: data,
       });
 
-      if (!res.ok) throw new Error();
+      const result = await res.json();
+
+      if (!res.ok) {
+        throw new Error(result.message);
+      }
 
       showSnackbar(
         editId
@@ -117,7 +135,8 @@ function AdminCreateEvent() {
         title: "",
         venue: "",
         date: "",
-        price: "",
+        vipPrice: "",
+        regularPrice: "",
         city: "",
       });
 
@@ -126,8 +145,8 @@ function AdminCreateEvent() {
       setEditId(null);
 
       fetchEvents();
-    } catch {
-      showSnackbar("Something went wrong ❌", "error");
+    } catch (error) {
+      showSnackbar(error.message || "Something went wrong ❌", "error");
     }
   };
 
@@ -138,10 +157,11 @@ function AdminCreateEvent() {
 
   const confirmDelete = async () => {
     try {
-      await fetch(
-        `https://gotixnow-backend.onrender.com/api/events/${deleteId}`,
-        { method: "DELETE" },
-      );
+      const res = await fetch(`${API_BASE}/api/events/${deleteId}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Delete failed");
 
       setDeleteOpen(false);
       fetchEvents();
@@ -156,11 +176,12 @@ function AdminCreateEvent() {
       title: event.title,
       venue: event.venue,
       date: event.date.split("T")[0],
-      price: event.price,
+      vipPrice: event.vipPrice ?? "",
+      regularPrice: event.regularPrice ?? "",
       city: event.city,
     });
 
-    setPreview(`https://gotixnow-backend.onrender.com/uploads/${event.image}`);
+    setPreview(event.image ? `${API_BASE}/uploads/${event.image}` : null);
     setEditId(event._id);
 
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -175,17 +196,9 @@ function AdminCreateEvent() {
       }}
     >
       <Container maxWidth="lg">
-        {/* SPLIT CARD */}
         <Grid container spacing={0}>
-          {/* LEFT SIDE */}
           <Grid item xs={12} md={6}>
-            <Paper
-              sx={{
-                p: 4,
-                height: "100%",
-                borderRadius: "20px 0 0 20px",
-              }}
-            >
+            <Paper sx={{ p: 4, borderRadius: "20px 0 0 20px" }}>
               <Typography variant="h5" fontWeight="bold" mb={3}>
                 {editId ? "Edit Event" : "Create Event"}
               </Typography>
@@ -216,12 +229,21 @@ function AdminCreateEvent() {
                   onChange={handleChange}
                   InputLabelProps={{ shrink: true }}
                 />
+
                 <TextField
                   fullWidth
-                  label="Price"
-                  name="price"
+                  label="VIP Price"
+                  name="vipPrice"
                   margin="normal"
-                  value={formData.price}
+                  value={formData.vipPrice}
+                  onChange={handleChange}
+                />
+                <TextField
+                  fullWidth
+                  label="Regular Price *"
+                  name="regularPrice"
+                  margin="normal"
+                  value={formData.regularPrice}
                   onChange={handleChange}
                 />
 
@@ -253,11 +275,7 @@ function AdminCreateEvent() {
                   type="submit"
                   variant="contained"
                   fullWidth
-                  sx={{
-                    mt: 3,
-                    borderRadius: "30px",
-                    background: "#ff4b2b",
-                  }}
+                  sx={{ mt: 3, borderRadius: "30px", background: "#ff4b2b" }}
                 >
                   {editId ? "Update Event" : "Create Event"}
                 </Button>
@@ -265,41 +283,26 @@ function AdminCreateEvent() {
             </Paper>
           </Grid>
 
-          {/* RIGHT SIDE */}
           <Grid item xs={12} md={6}>
             <Box
               sx={{
-                height: "100%",
                 background: "#ff4b2b",
                 color: "white",
                 p: 4,
                 borderRadius: "0 20px 20px 0",
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
               }}
             >
-              <Typography variant="h4" fontWeight="bold">
-                Preview
-              </Typography>
-
+              <Typography variant="h4">Preview</Typography>
               {preview && (
                 <img
                   src={preview}
-                  style={{
-                    width: "100%",
-                    maxHeight: 250,
-                    marginTop: 20,
-                    borderRadius: 12,
-                  }}
+                  style={{ width: "100%", marginTop: 20, borderRadius: 12 }}
                 />
               )}
             </Box>
           </Grid>
         </Grid>
 
-        {/* EVENTS */}
         <Typography variant="h4" mt={6} mb={3} color="white">
           Manage Events
         </Typography>
@@ -307,23 +310,25 @@ function AdminCreateEvent() {
         <Grid container spacing={3}>
           {events.map((event) => (
             <Grid item xs={12} md={4} key={event._id}>
-              <Card
-                sx={{
-                  borderRadius: 4,
-                  transition: "0.3s",
-                  "&:hover": { transform: "scale(1.03)" },
-                }}
-              >
+              <Card sx={{ borderRadius: 4 }}>
                 <Box
                   component="img"
-                  src={`https://gotixnow-backend.onrender.com/uploads/${event.image}`}
+                  src={
+                    event.image
+                      ? `${API_BASE}/uploads/${event.image}`
+                      : "/placeholder.jpg"
+                  }
                   sx={{ height: 180, width: "100%", objectFit: "cover" }}
                 />
 
                 <CardContent>
                   <Typography variant="h6">{event.title}</Typography>
                   <Typography>📍 {event.venue}</Typography>
-                  <Typography>₹{event.price}</Typography>
+
+                  <Typography>
+                    VIP: ₹{event.vipPrice ?? event.regularPrice} | Regular: ₹
+                    {event.regularPrice}
+                  </Typography>
 
                   <Box display="flex" justifyContent="flex-end">
                     <IconButton onClick={() => handleEdit(event)}>
@@ -343,13 +348,10 @@ function AdminCreateEvent() {
           ))}
         </Grid>
 
-        {/* DELETE DIALOG */}
         <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
           <DialogTitle>Delete Event</DialogTitle>
           <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this event?
-            </DialogContentText>
+            <DialogContentText>Are you sure?</DialogContentText>
           </DialogContent>
           <DialogActions>
             <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
@@ -359,7 +361,6 @@ function AdminCreateEvent() {
           </DialogActions>
         </Dialog>
 
-        {/* SNACKBAR */}
         <Snackbar
           open={openSnackbar}
           autoHideDuration={3000}

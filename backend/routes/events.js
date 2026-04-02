@@ -3,6 +3,7 @@ const router = express.Router();
 
 const multer = require("multer");
 const path = require("path");
+const mongoose = require("mongoose");
 
 const Event = require("../models/Event");
 
@@ -21,13 +22,39 @@ const upload = multer({ storage });
 
 router.post("/create", upload.single("image"), async (req, res) => {
   try {
-    const { title, venue, date, price, city } = req.body;
+    let { title, venue, date, vipPrice, regularPrice, city } = req.body;
+
+    if (!date) {
+      return res.status(400).json({
+        success: false,
+        message: "Date is required",
+      });
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid date format",
+      });
+    }
+
+    vipPrice = vipPrice ? Number(vipPrice) : undefined;
+    regularPrice = regularPrice ? Number(regularPrice) : undefined;
+
+    if (regularPrice == null) {
+      return res.status(400).json({
+        success: false,
+        message: "Regular price is required",
+      });
+    }
 
     const newEvent = new Event({
       title,
       venue,
-      date,
-      price,
+      date: parsedDate,
+      vipPrice,
+      regularPrice,
       city,
       image: req.file ? req.file.filename : null,
     });
@@ -43,7 +70,7 @@ router.post("/create", upload.single("image"), async (req, res) => {
     console.error("CREATE ERROR:", error);
     res.status(500).json({
       success: false,
-      message: "Error creating event",
+      message: error.message,
     });
   }
 });
@@ -97,43 +124,30 @@ router.get("/all", async (req, res) => {
   }
 });
 
-/* ================= GET EVENT BY ID ================= */
-
-router.get("/:id", async (req, res) => {
-  try {
-    const event = await Event.findById(req.params.id);
-
-    if (!event) {
-      return res.status(404).json({
-        success: false,
-        message: "Event not found",
-      });
-    }
-
-    res.status(200).json({
-      success: true,
-      event,
-    });
-  } catch (error) {
-    console.error("FETCH EVENT ERROR:", error);
-    res.status(500).json({
-      success: false,
-      message: "Error fetching event",
-    });
-  }
-});
-
 /* ================= UPDATE EVENT ================= */
 
 router.put("/update/:id", upload.single("image"), async (req, res) => {
   try {
-    const { title, venue, date, price, city } = req.body;
+    let { title, venue, date, vipPrice, regularPrice, city } = req.body;
+
+    const parsedDate = new Date(date);
+
+    vipPrice = vipPrice ? Number(vipPrice) : undefined;
+    regularPrice = regularPrice ? Number(regularPrice) : undefined;
+
+    if (regularPrice == null) {
+      return res.status(400).json({
+        success: false,
+        message: "Regular price is required",
+      });
+    }
 
     const updateData = {
       title,
       venue,
-      date,
-      price,
+      date: parsedDate,
+      vipPrice,
+      regularPrice,
       city,
     };
 
@@ -146,6 +160,13 @@ router.put("/update/:id", upload.single("image"), async (req, res) => {
       updateData,
       { new: true },
     );
+
+    if (!updatedEvent) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
 
     res.status(200).json({
       success: true,
@@ -183,6 +204,41 @@ router.delete("/:id", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Error deleting event",
+    });
+  }
+});
+
+/* ================= GET EVENT BY ID ================= */
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid event ID",
+      });
+    }
+
+    const event = await Event.findById(id);
+
+    if (!event) {
+      return res.status(404).json({
+        success: false,
+        message: "Event not found",
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      event,
+    });
+  } catch (error) {
+    console.error("FETCH EVENT ERROR:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching event",
     });
   }
 });
