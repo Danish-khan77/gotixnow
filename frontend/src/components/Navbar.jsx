@@ -1,8 +1,6 @@
 import {
-  AppBar,
-  Toolbar,
-  Typography,
   Box,
+  Typography,
   Button,
   Dialog,
   DialogTitle,
@@ -14,6 +12,7 @@ import {
 
 import BookOnlineIcon from "@mui/icons-material/BookOnline";
 import PersonIcon from "@mui/icons-material/Person";
+import ConfirmationNumberIcon from "@mui/icons-material/ConfirmationNumber";
 
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -36,60 +35,138 @@ const Navbar = () => {
 
   return (
     <>
-      <AppBar
-        position="static"
+      {/* NAVBAR */}
+      <Box
         sx={{
-          background: "linear-gradient(90deg,#6a11cb,#ff416c)",
-          backdropFilter: "blur(10px)",
+          width: "100%",
+          display: "flex",
+          justifyContent: "center",
+          mt: 2,
         }}
       >
-        <Toolbar
+        <Box
           sx={{
+            width: "90%",
+            maxWidth: "1200px",
+            background: "white",
+            borderRadius: "20px",
+            px: 4,
+            py: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
           }}
         >
-          {/* Logo */}
-          <Typography
-            variant="h6"
+          {/* LOGO */}
+          <Box
             sx={{
-              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
               cursor: "pointer",
-              letterSpacing: 1,
             }}
             onClick={() => navigate("/home")}
           >
-            🎟 GotixNow
-          </Typography>
+            <ConfirmationNumberIcon sx={{ color: "#e74c3c" }} />
+            <Typography variant="h6" fontWeight={700}>
+              <span style={{ color: "#e74c3c" }}>Gotix</span>
+              <span style={{ color: "#2c7a7b" }}>Now</span>
+            </Typography>
+          </Box>
 
-          {/* Right Side */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-            {/* Admin Panel */}
-            {user.role === "admin" && (
+          {/* NAV BUTTONS */}
+          <Box sx={{ display: "flex", gap: 2 }}>
+            {/* Home */}
+            <Button
+              onClick={() => navigate("/home")}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                borderRadius: "20px",
+                px: 3,
+                background: isHome ? "#2c7a7b" : "#f5f5f5",
+                color: isHome ? "white" : "#333",
+                ":hover": {
+                  background: isHome ? "#256d6d" : "#eaeaea",
+                },
+              }}
+            >
+              Home
+            </Button>
+
+            {/* Events */}
+            {!isHome && (
               <Button
-                color="inherit"
-                onClick={() => navigate("/admin-create-event")}
+                onClick={() => navigate("/dashboard")}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: "20px",
+                  px: 3,
+                  background:
+                    currentRoute === "/dashboard" ? "#2c7a7b" : "#f5f5f5",
+                  color: currentRoute === "/dashboard" ? "white" : "#333",
+                  ":hover": {
+                    background:
+                      currentRoute === "/dashboard" ? "#256d6d" : "#eaeaea",
+                  },
+                }}
               >
-                Admin Panel
+                Events
               </Button>
             )}
 
-            {/* Show only after home */}
+            {/* Admin */}
+            {user.role === "admin" && (
+              <Button
+                onClick={() => navigate("/admin-create-event")}
+                sx={{
+                  textTransform: "none",
+                  fontWeight: 600,
+                  borderRadius: "20px",
+                  px: 3,
+                  background:
+                    currentRoute === "/admin-create-event"
+                      ? "#e74c3c"
+                      : "#ffe5e0",
+                  color:
+                    currentRoute === "/admin-create-event"
+                      ? "white"
+                      : "#e74c3c",
+                  ":hover": {
+                    background:
+                      currentRoute === "/admin-create-event"
+                        ? "#c0392b"
+                        : "#ffd6cf",
+                  },
+                }}
+              >
+                Admin
+              </Button>
+            )}
+          </Box>
+
+          {/* RIGHT SIDE */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             {!isHome && (
               <>
-                {/* My Bookings Icon */}
                 <IconButton
-                  color="inherit"
                   onClick={() => navigate("/bookings")}
+                  sx={{
+                    background: "#f5f5f5",
+                    ":hover": { background: "#eee" },
+                  }}
                 >
                   <BookOnlineIcon />
                 </IconButton>
 
-                {/* Profile Icon */}
                 <IconButton
-                  color="inherit"
                   onClick={() => navigate("/profile")}
+                  sx={{
+                    background: "#f5f5f5",
+                    ":hover": { background: "#eee" },
+                  }}
                 >
                   <PersonIcon />
                 </IconButton>
@@ -98,21 +175,25 @@ const Navbar = () => {
 
             {/* Logout */}
             <Button
-              variant="contained"
-              color="error"
               onClick={() => setOpenDialog(true)}
               sx={{
+                background: "black",
+                color: "white",
+                borderRadius: "30px",
+                px: 3,
                 fontWeight: 600,
-                borderRadius: 2,
+                ":hover": {
+                  background: "#333",
+                },
               }}
             >
-              Logout
+              LOGOUT
             </Button>
           </Box>
-        </Toolbar>
-      </AppBar>
+        </Box>
+      </Box>
 
-      {/* Logout Confirmation Dialog */}
+      {/* LOGOUT DIALOG */}
       <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
         <DialogTitle>Confirm Logout</DialogTitle>
         <DialogContent>

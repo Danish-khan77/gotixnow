@@ -85,7 +85,6 @@ function AdminCreateEvent() {
     e.preventDefault();
 
     const data = new FormData();
-
     Object.keys(formData).forEach((key) => {
       data.append(key, formData[key]);
     });
@@ -141,9 +140,7 @@ function AdminCreateEvent() {
     try {
       await fetch(
         `https://gotixnow-backend.onrender.com/api/events/${deleteId}`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
 
       setDeleteOpen(false);
@@ -173,117 +170,162 @@ function AdminCreateEvent() {
     <Box
       sx={{
         minHeight: "100vh",
-        background: "linear-gradient(135deg,#0f2027,#203a43,#2c5364)",
-        p: 5,
+        background: "linear-gradient(135deg,#1f4037,#99f2c8)",
+        p: 4,
       }}
     >
       <Container maxWidth="lg">
-        <Paper
-          elevation={12}
-          sx={{ p: 5, borderRadius: 4, background: "white", mb: 6 }}
-        >
-          <Typography variant="h4" textAlign="center" mb={4}>
-            {editId ? "Edit Event" : "Create Event"}
-          </Typography>
-
-          <form onSubmit={handleSubmit}>
-            <TextField
-              fullWidth
-              label="Event Title"
-              name="title"
-              margin="normal"
-              value={formData.title}
-              onChange={handleChange}
-            />
-
-            <TextField
-              fullWidth
-              label="Venue"
-              name="venue"
-              margin="normal"
-              value={formData.venue}
-              onChange={handleChange}
-            />
-
-            <TextField
-              type="date"
-              fullWidth
-              name="date"
-              margin="normal"
-              value={formData.date}
-              onChange={handleChange}
-              InputLabelProps={{ shrink: true }}
-            />
-
-            <TextField
-              fullWidth
-              label="Price"
-              name="price"
-              margin="normal"
-              value={formData.price}
-              onChange={handleChange}
-            />
-
-            <TextField
-              select
-              fullWidth
-              label="City"
-              name="city"
-              margin="normal"
-              value={formData.city}
-              onChange={handleChange}
+        {/* SPLIT CARD */}
+        <Grid container spacing={0}>
+          {/* LEFT SIDE */}
+          <Grid item xs={12} md={6}>
+            <Paper
+              sx={{
+                p: 4,
+                height: "100%",
+                borderRadius: "20px 0 0 20px",
+              }}
             >
-              <MenuItem value="Bhopal">Bhopal</MenuItem>
-              <MenuItem value="Indore">Indore</MenuItem>
-              <MenuItem value="Delhi">Delhi</MenuItem>
-            </TextField>
+              <Typography variant="h5" fontWeight="bold" mb={3}>
+                {editId ? "Edit Event" : "Create Event"}
+              </Typography>
 
-            <Button
-              variant="outlined"
-              component="label"
-              fullWidth
-              sx={{ mt: 3 }}
+              <form onSubmit={handleSubmit}>
+                <TextField
+                  fullWidth
+                  label="Title"
+                  name="title"
+                  margin="normal"
+                  value={formData.title}
+                  onChange={handleChange}
+                />
+                <TextField
+                  fullWidth
+                  label="Venue"
+                  name="venue"
+                  margin="normal"
+                  value={formData.venue}
+                  onChange={handleChange}
+                />
+                <TextField
+                  type="date"
+                  fullWidth
+                  name="date"
+                  margin="normal"
+                  value={formData.date}
+                  onChange={handleChange}
+                  InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                  fullWidth
+                  label="Price"
+                  name="price"
+                  margin="normal"
+                  value={formData.price}
+                  onChange={handleChange}
+                />
+
+                <TextField
+                  select
+                  fullWidth
+                  label="City"
+                  name="city"
+                  margin="normal"
+                  value={formData.city}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="Bhopal">Bhopal</MenuItem>
+                  <MenuItem value="Indore">Indore</MenuItem>
+                  <MenuItem value="Delhi">Delhi</MenuItem>
+                </TextField>
+
+                <Button
+                  variant="outlined"
+                  component="label"
+                  fullWidth
+                  sx={{ mt: 2 }}
+                >
+                  Upload Image
+                  <input hidden type="file" onChange={handleImageChange} />
+                </Button>
+
+                <Button
+                  type="submit"
+                  variant="contained"
+                  fullWidth
+                  sx={{
+                    mt: 3,
+                    borderRadius: "30px",
+                    background: "#ff4b2b",
+                  }}
+                >
+                  {editId ? "Update Event" : "Create Event"}
+                </Button>
+              </form>
+            </Paper>
+          </Grid>
+
+          {/* RIGHT SIDE */}
+          <Grid item xs={12} md={6}>
+            <Box
+              sx={{
+                height: "100%",
+                background: "#ff4b2b",
+                color: "white",
+                p: 4,
+                borderRadius: "0 20px 20px 0",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
-              Browse Event Image
-              <input hidden type="file" onChange={handleImageChange} />
-            </Button>
+              <Typography variant="h4" fontWeight="bold">
+                Preview
+              </Typography>
 
-            {preview && (
-              <Box sx={{ mt: 2 }}>
+              {preview && (
                 <img
                   src={preview}
-                  style={{ width: "100%", maxHeight: 200, objectFit: "cover" }}
+                  style={{
+                    width: "100%",
+                    maxHeight: 250,
+                    marginTop: 20,
+                    borderRadius: 12,
+                  }}
                 />
-              </Box>
-            )}
+              )}
+            </Box>
+          </Grid>
+        </Grid>
 
-            <Button type="submit" variant="contained" fullWidth sx={{ mt: 4 }}>
-              {editId ? "Save Changes" : "Create Event"}
-            </Button>
-          </form>
-        </Paper>
-
-        <Typography variant="h4" color="white" mb={4}>
+        {/* EVENTS */}
+        <Typography variant="h4" mt={6} mb={3} color="white">
           Manage Events
         </Typography>
 
         <Grid container spacing={3}>
           {events.map((event) => (
-            <Grid item xs={12} md={6} key={event._id}>
-              <Card>
+            <Grid item xs={12} md={4} key={event._id}>
+              <Card
+                sx={{
+                  borderRadius: 4,
+                  transition: "0.3s",
+                  "&:hover": { transform: "scale(1.03)" },
+                }}
+              >
                 <Box
                   component="img"
                   src={`https://gotixnow-backend.onrender.com/uploads/${event.image}`}
-                  sx={{ width: "100%", height: 200, objectFit: "cover" }}
+                  sx={{ height: 180, width: "100%", objectFit: "cover" }}
                 />
 
                 <CardContent>
                   <Typography variant="h6">{event.title}</Typography>
-
                   <Typography>📍 {event.venue}</Typography>
-                  <Typography>💰 ₹{event.price}</Typography>
+                  <Typography>₹{event.price}</Typography>
 
-                  <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Box display="flex" justifyContent="flex-end">
                     <IconButton onClick={() => handleEdit(event)}>
                       <EditIcon />
                     </IconButton>
@@ -301,33 +343,29 @@ function AdminCreateEvent() {
           ))}
         </Grid>
 
+        {/* DELETE DIALOG */}
         <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
           <DialogTitle>Delete Event</DialogTitle>
-
           <DialogContent>
             <DialogContentText>
               Are you sure you want to delete this event?
             </DialogContentText>
           </DialogContent>
-
           <DialogActions>
             <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-
             <Button color="error" variant="contained" onClick={confirmDelete}>
               Delete
             </Button>
           </DialogActions>
         </Dialog>
 
+        {/* SNACKBAR */}
         <Snackbar
           open={openSnackbar}
           autoHideDuration={3000}
           onClose={() => setOpenSnackbar(false)}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
         >
-          <Alert severity={snackbarType} sx={{ width: "100%" }}>
-            {snackbarMessage}
-          </Alert>
+          <Alert severity={snackbarType}>{snackbarMessage}</Alert>
         </Snackbar>
       </Container>
     </Box>

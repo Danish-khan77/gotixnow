@@ -1,6 +1,6 @@
 body {
   margin: 0;
-  background-color: #0f0f1a;
-  color: white;
+  background-color: #f5f5f5; /* ✅ light clean background */
+  color: #333; /* dark text */
   font-family: Poppins, sans-serif;
 }

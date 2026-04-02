@@ -23,7 +23,7 @@ const Register = () => {
 
     try {
       const res = await fetch(
-        "https://gotixnow-backend.onrender.com/api/auth/register", // ✅ fixed backend URL
+        "https://gotixnow-backend.onrender.com/api/auth/register",
         {
           method: "POST",
           headers: {
@@ -55,12 +55,37 @@ const Register = () => {
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        background: "linear-gradient(135deg, #667eea, #764ba2)",
+        background: "linear-gradient(135deg,#e74c3c,#2c7a7b,#e6b566)",
+        px: 2,
       }}
     >
-      <Paper elevation={6} sx={{ p: 5, width: 400, borderRadius: 3 }}>
-        <Typography variant="h4" fontWeight={700} mb={3} textAlign="center">
-          Create Account
+      <Paper
+        elevation={12}
+        sx={{
+          p: 5,
+          width: "100%",
+          maxWidth: "420px",
+          borderRadius: 4,
+          background: "rgba(255,255,255,0.95)",
+          backdropFilter: "blur(12px)",
+          boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
+        }}
+      >
+        {/* Heading */}
+        <Typography
+          variant="h4"
+          align="center"
+          sx={{
+            fontWeight: 800,
+            color: "#e74c3c",
+            letterSpacing: 1,
+          }}
+        >
+          GotixNow
+        </Typography>
+
+        <Typography align="center" sx={{ mt: 1, mb: 3, color: "gray" }}>
+          Create your account 🚀
         </Typography>
 
         <TextField
@@ -70,6 +95,11 @@ const Register = () => {
           margin="normal"
           value={form.name}
           onChange={handleChange}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+            },
+          }}
         />
 
         <TextField
@@ -79,6 +109,11 @@ const Register = () => {
           margin="normal"
           value={form.email}
           onChange={handleChange}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+            },
+          }}
         />
 
         <TextField
@@ -89,12 +124,26 @@ const Register = () => {
           margin="normal"
           value={form.password}
           onChange={handleChange}
+          sx={{
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "12px",
+            },
+          }}
         />
 
         <Button
           fullWidth
-          variant="contained"
-          sx={{ mt: 3, py: 1.2, fontWeight: 600 }}
+          sx={{
+            mt: 3,
+            py: 1.4,
+            fontWeight: 700,
+            borderRadius: "30px",
+            background: "#e74c3c",
+            color: "white",
+            ":hover": {
+              background: "#c0392b",
+            },
+          }}
           onClick={handleRegister}
         >
           Register
@@ -104,7 +153,7 @@ const Register = () => {
           Already have an account?{" "}
           <span
             style={{
-              color: "#6c63ff",
+              color: "#2c7a7b",
               cursor: "pointer",
               fontWeight: 600,
             }}

@@ -79,35 +79,36 @@ const Login = () => {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea, #764ba2, #6B73FF)",
+        background: "linear-gradient(135deg,#e74c3c,#2c7a7b,#e6b566)",
         px: 2,
       }}
     >
       <Container maxWidth="sm">
         <Paper
-          elevation={10}
+          elevation={12}
           sx={{
             p: 5,
             borderRadius: 4,
-            backdropFilter: "blur(10px)",
-            backgroundColor: "rgba(255,255,255,0.95)",
+            background: "rgba(255,255,255,0.95)",
+            backdropFilter: "blur(12px)",
+            boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
           }}
         >
+          {/* Heading */}
           <Typography
             variant="h4"
             align="center"
-            gutterBottom
-            sx={{ fontWeight: 700 }}
+            sx={{
+              fontWeight: 800,
+              color: "#e74c3c",
+              letterSpacing: 1,
+            }}
           >
-            Welcome Back 👋
+            GotixNow
           </Typography>
 
-          <Typography
-            variant="body1"
-            align="center"
-            sx={{ mb: 3, color: "gray" }}
-          >
-            Login to continue your journey with GotixNow
+          <Typography align="center" sx={{ mt: 1, mb: 3, color: "gray" }}>
+            Welcome back, login to continue
           </Typography>
 
           <form onSubmit={handleLogin}>
@@ -119,6 +120,11 @@ const Login = () => {
               value={formData.email}
               onChange={handleChange}
               required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                },
+              }}
             />
 
             <TextField
@@ -130,18 +136,26 @@ const Login = () => {
               value={formData.password}
               onChange={handleChange}
               required
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: "12px",
+                },
+              }}
             />
 
             <Button
               type="submit"
-              variant="contained"
               fullWidth
               sx={{
                 mt: 3,
-                py: 1.3,
-                fontWeight: 600,
-                borderRadius: 3,
-                background: "linear-gradient(90deg,#6a11cb,#ff416c)",
+                py: 1.4,
+                fontWeight: 700,
+                borderRadius: "30px",
+                background: "#e74c3c",
+                color: "white",
+                ":hover": {
+                  background: "#c0392b",
+                },
               }}
             >
               Login
@@ -149,7 +163,7 @@ const Login = () => {
 
             <Button
               fullWidth
-              sx={{ mt: 2, fontWeight: 500 }}
+              sx={{ mt: 2, color: "#2c7a7b", fontWeight: 600 }}
               onClick={() => navigate("/register")}
             >
               Don’t have an account? Register
@@ -158,7 +172,7 @@ const Login = () => {
         </Paper>
       </Container>
 
-      {/* Snackbar UI Message */}
+      {/* Snackbar */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={3000}
