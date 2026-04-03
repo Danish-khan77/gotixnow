@@ -2,18 +2,37 @@ const express = require("express");
 const router = express.Router();
 const { sendEmail } = require("../utils/emailService");
 
-router.get("/test-mail", async (req, res) => {
+router.post("/test-mail", async (req, res) => {
   try {
-    await sendEmail(
-      "your_email@gmail.com",
-      "Test Email 🚀",
-      "<h2>Email is working successfully 🎉</h2>",
+    const { email } = req.body;
+
+    // ✅ validation
+    if (!email) {
+      return res.status(400).json({ message: "Email is required" });
+    }
+
+    console.log("📧 Sending test email to:", email);
+
+    // 📧 send email
+    const response = await sendEmail(
+      email,
+      "Verify Your Email 🚀",
+      `<h2>Email is working successfully 🎉</h2>
+       <p>Please verify your email to continue.</p>`,
     );
 
-    res.send("Mail sent successfully!");
+    console.log("✅ Email response:", response.response);
+
+    res.status(200).json({
+      message: "Mail sent successfully!",
+    });
   } catch (error) {
-    console.log(error);
-    res.status(500).send("Mail failed");
+    console.log("❌ Mail error:", error.message);
+
+    res.status(500).json({
+      message: "Mail failed",
+      error: error.message,
+    });
   }
 });
 

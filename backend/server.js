@@ -1,5 +1,11 @@
-require("node:dns/promises").setServers(["1.1.1.1", "8.8.8.8"]);
 require("dotenv").config();
+
+// ✅ Safe DNS config (prevents crash if unsupported)
+try {
+  require("node:dns").setServers(["1.1.1.1", "8.8.8.8"]);
+} catch (err) {
+  console.log("DNS config skipped");
+}
 
 const express = require("express");
 const cors = require("cors");

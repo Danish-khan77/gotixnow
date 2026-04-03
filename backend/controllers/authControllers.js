@@ -12,15 +12,40 @@ const registerUser = async (req, res) => {
 
     console.log("📩 Register attempt:", email);
 
+    // 🔍 check existing user
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      // 👉 if already verified
+      if (existingUser.isVerified) {
+        return res.status(400).json({
+          message: "Email already registered",
+        });
+      }
+
+      // 👉 if NOT verified → resend email
+      const verifyURL = `https://gotixnow-backend.onrender.com/api/auth/verify/${existingUser.verificationToken}`;
+
+      const htmlContent = `
+        <h2>Verify Your Email 🎟</h2>
+        <p>You already registered. Click below to verify:</p>
+        <a href="${verifyURL}">Verify Email</a>
+      `;
+
+      await sendEmail(email, "Verify Your Account", htmlContent);
+
+      return res.status(200).json({
+        message: "Verification email resent. Check your email.",
+      });
     }
 
+    // 🔐 hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    // 🔑 generate token
     const verificationToken = crypto.randomBytes(32).toString("hex");
 
+    // 👤 create user
     const user = await User.create({
       name,
       email,
@@ -31,6 +56,7 @@ const registerUser = async (req, res) => {
 
     console.log("🪪 Saved Token:", verificationToken);
 
+    // 🔗 verification link
     const verifyURL = `https://gotixnow-backend.onrender.com/api/auth/verify/${verificationToken}`;
 
     const htmlContent = `
@@ -39,6 +65,7 @@ const registerUser = async (req, res) => {
       <a href="${verifyURL}">Verify Email</a>
     `;
 
+    // 📧 send email
     await sendEmail(email, "Verify Your Account", htmlContent);
 
     console.log("✅ Verification email sent");
@@ -48,10 +75,17 @@ const registerUser = async (req, res) => {
     });
   } catch (error) {
     console.log("❌ Register Error:", error);
+
+    // 🔥 handle duplicate key error
+    if (error.code === 11000) {
+      return res.status(400).json({
+        message: "Email already exists",
+      });
+    }
+
     res.status(500).json({ message: error.message });
   }
 };
-
 /* ================= VERIFY EMAIL ================= */
 
 const verifyEmail = async (req, res) => {
