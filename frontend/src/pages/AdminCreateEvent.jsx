@@ -26,7 +26,7 @@ import EditIcon from "@mui/icons-material/Edit";
 const API_BASE =
   import.meta.env.MODE === "development"
     ? "http://localhost:5000"
-    : "https://monumental-macaron-fa6c3a.onrender.com";
+    : "https://gotixnow-backend.onrender.com";
 
 function AdminCreateEvent() {
   const [formData, setFormData] = useState({
