@@ -11,6 +11,8 @@ const Register = () => {
     password: "",
   });
 
+  const [loading, setLoading] = useState(false); // ✅ added
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
@@ -22,6 +24,8 @@ const Register = () => {
     }
 
     try {
+      setLoading(true); // ✅ start loading
+
       const res = await fetch(
         "https://gotixnow-backend.onrender.com/api/auth/register",
         {
@@ -45,6 +49,8 @@ const Register = () => {
     } catch (error) {
       console.error("Register error:", error);
       alert(error.message || "Server not responding");
+    } finally {
+      setLoading(false); // ✅ stop loading
     }
   };
 
@@ -71,7 +77,6 @@ const Register = () => {
           boxShadow: "0 20px 50px rgba(0,0,0,0.2)",
         }}
       >
-        {/* Heading */}
         <Typography
           variant="h4"
           align="center"
@@ -133,6 +138,7 @@ const Register = () => {
 
         <Button
           fullWidth
+          disabled={loading} // ✅ prevent multiple clicks
           sx={{
             mt: 3,
             py: 1.4,
@@ -146,7 +152,7 @@ const Register = () => {
           }}
           onClick={handleRegister}
         >
-          Register
+          {loading ? "Registering..." : "Register"} {/* ✅ UX improvement */}
         </Button>
 
         <Typography mt={3} textAlign="center">
