@@ -14,12 +14,8 @@ function SeatGrid() {
   const [event, setEvent] = useState(null);
   const [bookedSeats, setBookedSeats] = useState([]);
 
-  // 🔥 FIX: validate ID before API call
   useEffect(() => {
-    if (!id || id === "all" || id === "undefined") {
-      console.log("Invalid ID:", id);
-      return;
-    }
+    if (!id || id === "all" || id === "undefined") return;
 
     const fetchEvent = async () => {
       try {
@@ -28,24 +24,21 @@ function SeatGrid() {
         );
         setEvent(res.data.event);
       } catch (err) {
-        console.log("Error fetching event", err);
+        console.log(err);
       }
     };
 
     fetchEvent();
   }, [id]);
 
-  // Fetch booked seats
   const fetchBookedSeats = async () => {
-    if (!id || id === "all" || id === "undefined") return;
-
     try {
       const res = await axios.get(
         `https://gotixnow-backend.onrender.com/api/bookings/event/${id}`,
       );
       setBookedSeats(res.data.bookedSeats || []);
     } catch (err) {
-      console.log("Error fetching booked seats", err);
+      console.log(err);
     }
   };
 
@@ -53,7 +46,6 @@ function SeatGrid() {
     fetchBookedSeats();
   }, [id]);
 
-  // Price logic (same)
   const getSeatPrice = (seatNumber) => {
     if (!event) return 0;
 
@@ -81,7 +73,8 @@ function SeatGrid() {
     0,
   );
 
-  const handleProceed = async () => {
+  // ✅ Only change: navigate to payment page
+  const handleProceed = () => {
     if (selectedSeats.length === 0) {
       alert("Please select at least one seat.");
       return;
@@ -101,31 +94,14 @@ function SeatGrid() {
       return;
     }
 
-    const payload = {
-      user: user._id,
-      event: id,
-      seats: selectedSeats.map(Number),
-      totalAmount,
-    };
-
-    try {
-      const res = await axios.post(
-        "https://gotixnow-backend.onrender.com/api/bookings/create",
-        payload,
-      );
-
-      if (res.data.success) {
-        alert("Booking Successful 🎉");
-
-        setBookedSeats((prev) => [...prev, ...selectedSeats]);
-        setSelectedSeats([]);
-
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      alert(err.response?.data?.message || "Booking failed. Please try again.");
-      fetchBookedSeats();
-    }
+    navigate("/payment", {
+      state: {
+        user: user._id,
+        event: id,
+        seats: selectedSeats,
+        totalAmount,
+      },
+    });
   };
 
   return (
@@ -202,36 +178,9 @@ function SeatGrid() {
         })}
       </div>
 
-      <div style={{ marginTop: "30px", textAlign: "center" }}>
-        <span style={{ marginRight: "20px" }}>
-          🟣 VIP (₹{event?.vipPrice ?? event?.price})
-        </span>
-        <span style={{ marginRight: "20px" }}>
-          🔵 Regular (₹{event?.regularPrice ?? event?.price})
-        </span>
-        <span style={{ marginRight: "20px" }}>🔴 Selected</span>
-        <span>⚫ Booked</span>
-      </div>
-
-      <div
-        style={{
-          marginTop: "40px",
-          padding: "25px",
-          background: "#1e293b",
-          borderRadius: "12px",
-          maxWidth: "600px",
-          marginLeft: "auto",
-          marginRight: "auto",
-        }}
-      >
+      <div style={{ marginTop: "40px", textAlign: "center" }}>
         <h3>Selected Seats:</h3>
-        <p>
-          {selectedSeats.length > 0
-            ? selectedSeats.join(", ")
-            : "No seats selected"}
-        </p>
-
-        <h4>Total Seats: {selectedSeats.length}</h4>
+        <p>{selectedSeats.length > 0 ? selectedSeats.join(", ") : "None"}</p>
         <h2>Total Amount: ₹{totalAmount}</h2>
 
         <button

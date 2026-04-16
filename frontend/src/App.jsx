@@ -12,6 +12,7 @@ import AdminCreateEvent from "./pages/AdminCreateEvent";
 import MyBookings from "./pages/MyBookings";
 import MyProfile from "./pages/MyProfile";
 import VerifySuccess from "./pages/VerifySuccess";
+import Payment from "./pages/Payment"; // ✅ ADDED
 
 function App() {
   const location = useLocation();
@@ -20,7 +21,8 @@ function App() {
   const hideNavbar =
     location.pathname === "/login" ||
     location.pathname === "/register" ||
-    location.pathname.startsWith("/seats");
+    location.pathname.startsWith("/seats") ||
+    location.pathname === "/payment"; // ✅ ADDED
 
   return (
     <>
@@ -77,6 +79,16 @@ function App() {
           element={
             <ProtectedRoute>
               <SeatGrid />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* ✅ NEW PAYMENT ROUTE */}
+        <Route
+          path="/payment"
+          element={
+            <ProtectedRoute>
+              <Payment />
             </ProtectedRoute>
           }
         />
